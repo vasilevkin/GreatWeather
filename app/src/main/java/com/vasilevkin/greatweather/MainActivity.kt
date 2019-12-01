@@ -19,6 +19,11 @@ import retrofit2.http.Query
 import java.util.*
 
 
+
+// TODO: 1. Add CardView
+// TODO: 2. Refactor download (requests array: lat, lon)
+// TODO: 3. Weather icons ?
+
 class MainActivity : AppCompatActivity() {
 
     private var baseUrl = "http://api.openweathermap.org/"
