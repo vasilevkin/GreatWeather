@@ -2,20 +2,20 @@ package com.vasilevkin.greatweather
 
 import android.os.Bundle
 import android.util.Log
-import com.google.android.material.snackbar.Snackbar
+import android.view.*
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
-
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Query
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.Retrofit
-import android.widget.TextView
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Query
 import java.util.*
 
 
@@ -27,6 +27,12 @@ class MainActivity : AppCompatActivity() {
     var lon = "44"
     val units = "metric"
     private var weatherData: TextView? = null
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var viewAdapter: RecyclerView.Adapter<*>
+    private lateinit var viewManager: RecyclerView.LayoutManager
+
+    private var myDataset = arrayOf("s1", "s2", "s3")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +46,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         weatherData = findViewById(R.id.textView)
+
+        viewManager = LinearLayoutManager(this)
+        viewAdapter = MyAdapter(myDataset)
+
+        recyclerView = findViewById<RecyclerView>(R.id.main_recycler_view).apply {
+            // use this setting to improve performance if you know that changes
+            // in content do not change the layout size of the RecyclerView
+            setHasFixedSize(true)
+
+            // use a linear layout manager
+            layoutManager = viewManager
+
+            // specify an viewAdapter (see also next example)
+            adapter = viewAdapter
+        }
+
 
         Log.d("MainActivity", "Hello World");
     }
@@ -77,27 +99,27 @@ class MainActivity : AppCompatActivity() {
                             "Country: " +
                             weatherResponse.sys.country +
                             "\n" +
-                            "City: " +
-                            weatherResponse.name +
-                            "\n" +
-                                    "Base: " +
-                                    weatherResponse.weather[0].description +
-                                    "\n" +
+                                "City: " +
+                                weatherResponse.name +
+                                "\n" +
+                                "Base: " +
+                                weatherResponse.weather[0].description +
+                                "\n" +
 
-                            "Temperature: " +
-                            weatherResponse.main.temp +
-                            "\n" +
-                            "Temperature(Min): " +
-                            weatherResponse.main.temp_min +
-                            "\n" +
-                            "Temperature(Max): " +
-                            weatherResponse.main.temp_max +
-                            "\n" +
-                            "Humidity: " +
-                            weatherResponse.main.humidity +
-                            "\n" +
-                            "Pressure: " +
-                            weatherResponse.main.pressure
+                                "Temperature: " +
+                                weatherResponse.main.temp +
+                                "\n" +
+                                "Temperature(Min): " +
+                                weatherResponse.main.temp_min +
+                                "\n" +
+                                "Temperature(Max): " +
+                                weatherResponse.main.temp_max +
+                                "\n" +
+                                "Humidity: " +
+                                weatherResponse.main.humidity +
+                                "\n" +
+                                "Pressure: " +
+                                weatherResponse.main.pressure
 
                     weatherData?.setText(stringBuilder)
                 }
@@ -129,15 +151,71 @@ class MainActivity : AppCompatActivity() {
                 5 -> icon = getString(R.string.weather_rainy)
             }
         }
-        Log.d("new","icon = " + icon)
+        Log.d("new", "icon = " + icon)
         return icon
     }
 }
 
 
+class MyAdapter(private val myDataset: Array<String>) :
+    RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
+
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder.
+    // Each data item is just a string in this case that is shown in a TextView.
+//    class MyViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
+
+    class MyViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+        val textView: TextView
+
+        init {
+            // Define click listener for the ViewHolder's View.
+            v.setOnClickListener { Log.d("Some", "Element $adapterPosition clicked.") }
+            textView = v.findViewById(R.id.textView)
+        }
+    }
+
+
+    // Create new views (invoked by the layout manager)
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): MyAdapter.MyViewHolder {
+//        // create a new view
+//        val textView = LayoutInflater.from(parent.context)
+//            .inflate(R.layout.weather_row, parent, false) as TextView
+//        // set the view's size, margins, paddings and layout parameters
+//
+//        return MyViewHolder(textView)
+
+        // Create a new view.
+        val v = LayoutInflater.from(parent.context)
+            .inflate(R.layout.weather_row, parent, false)
+
+        return MyViewHolder(v)
+
+    }
+
+    // Replace the contents of a view (invoked by the layout manager)
+    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        // - get element from your dataset at this position
+        // - replace the contents of the view with that element
+        holder.textView.text = myDataset[position]
+    }
+
+    // Return the size of your dataset (invoked by the layout manager)
+    override fun getItemCount() = myDataset.size
+
+}
+
 interface WeatherService {
     @GET("data/2.5/weather?")
-    fun getCurrentWeatherData(@Query("lat") lat: String, @Query("lon") lon: String, @Query("APPID") app_id: String, @Query("units") units: String): Call<WeatherResponse>
+    fun getCurrentWeatherData(
+        @Query("lat") lat: String, @Query("lon") lon: String, @Query("APPID") app_id: String, @Query(
+            "units"
+        ) units: String
+    ): Call<WeatherResponse>
 }
 
 data class WeatherResponse(
