@@ -34,12 +34,14 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, "Downloading weather data...", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
             getCurrentData()
         }
 
         weatherData = findViewById(R.id.textView)
+
+        Log.d("MainActivity", "Hello World");
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
